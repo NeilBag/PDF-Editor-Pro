@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Editor Pro</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-file-pdf"></i> PDF Editor Pro</h1>
+                <div class="header-actions">
+                    <button id="uploadBtn" class="btn btn-primary">
+                        <i class="fas fa-upload"></i> Upload PDF
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <h3><i class="fas fa-tools"></i> Tools</h3>
+                    <div class="tool-buttons">
+                        <button id="addTextBtn" class="tool-btn" disabled>
+                            <i class="fas fa-font"></i> Add Text
+                        </button>
+                        <button id="editTextBtn" class="tool-btn" disabled>
+                            <i class="fas fa-edit"></i> Edit Text
+                        </button>
+                        <button id="extractTextBtn" class="tool-btn" disabled>
+                            <i class="fas fa-text-width"></i> Extract Text
+                        </button>
+                        <button id="ocrBtn" class="tool-btn" disabled>
+                            <i class="fas fa-search"></i> Scan Text
+                        </button>
+                        <button id="splitPdfBtn" class="tool-btn" disabled>
+                            <i class="fas fa-cut"></i> Split PDF
+                        </button>
+                        <button id="mergePdfBtn" class="tool-btn" disabled>
+                            <i class="fas fa-object-group"></i> Merge PDFs
+                        </button>
+                        <button id="downloadBtn" class="tool-btn" disabled>
+                            <i class="fas fa-download"></i> Download
+                        </button>
+                        <button id="convertToWordBtn" class="tool-btn" disabled>
+                            <i class="fas fa-file-word"></i> Convert to Word
+                        </button>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3><i class="fas fa-list"></i> Pages</h3>
+                    <div id="pagesList" class="pages-list">
+                        <p class="no-pdf">No PDF loaded</p>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- PDF Viewer -->
+            <div class="pdf-viewer">
+                <div id="pdfContainer" class="pdf-container">
+                    <div class="welcome-screen">
+                        <i class="fas fa-file-pdf welcome-icon"></i>
+                        <h2>Welcome to PDF Editor Pro</h2>
+                        <p>Upload a PDF file to start editing</p>
+                        <button class="btn btn-primary btn-large" onclick="document.getElementById('fileInput').click()">
+                            <i class="fas fa-upload"></i> Choose PDF File
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Modals -->
+        <!-- Add Text Modal -->
+        <div id="addTextModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-font"></i> Add Text</h3>
+                    <button class="close-btn" onclick="closeModal('addTextModal')">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="instruction-box">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Click on the PDF page to set the text position, or enter coordinates manually below.</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Text:</label>
+                        <textarea id="textInput" placeholder="Enter text to add..."></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Page:</label>
+                            <input type="number" id="pageInput" min="1" value="1">
+                        </div>
+                        <div class="form-group">
+                            <label>Font Size:</label>
+                            <input type="number" id="fontSizeInput" min="8" max="72" value="12">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>X Position:</label>
+                            <input type="number" id="xInput" value="100">
+                        </div>
+                        <div class="form-group">
+                            <label>Y Position:</label>
+                            <input type="number" id="yInput" value="100">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Text Color:</label>
+                        <div class="color-picker-container">
+                            <input type="color" id="colorInput" value="#000000">
+                            <span class="color-label">Black</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeModal('addTextModal')">Cancel</button>
+                    <button class="btn btn-primary" onclick="addText()">Add Text</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Split PDF Modal -->
+        <div id="splitModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-cut"></i> Split PDF</h3>
+                    <button class="close-btn" onclick="closeModal('splitModal')">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Start Page:</label>
+                            <input type="number" id="startPageInput" min="1" value="1">
+                        </div>
+                        <div class="form-group">
+                            <label>End Page:</label>
+                            <input type="number" id="endPageInput" min="1">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeModal('splitModal')">Cancel</button>
+                    <button class="btn btn-primary" onclick="splitPdf()">Split PDF</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Text Modal -->
+        <div id="editTextModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-edit"></i> Edit Text</h3>
+                    <button class="close-btn" onclick="closeModal('editTextModal')">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Original Text:</label>
+                        <textarea id="originalText" readonly></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>New Text:</label>
+                        <textarea id="newTextInput" placeholder="Enter new text..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Page: <span id="editPageNum"></span></label>
+                    </div>
+                    <div class="form-group">
+                        <div class="font-info-display" id="fontInfoDisplay">
+                            <h4>Original Font Properties:</h4>
+                            <div class="font-details">
+                                <span class="font-detail">Font: <span id="fontName">-</span></span>
+                                <span class="font-detail">Size: <span id="fontSize">-</span>pt</span>
+                                <span class="font-detail">Style: <span id="fontStyle">-</span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="preserveFormatting" checked>
+                            <span class="checkmark"></span>
+                            Preserve original font formatting
+                        </label>
+                        <p class="help-text">When enabled, the edited text will maintain the same font, size, and style as the original text.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeModal('editTextModal')">Cancel</button>
+                    <button class="btn btn-danger" onclick="deleteText()">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                    <button class="btn btn-primary" onclick="updateText()">
+                        <i class="fas fa-save"></i> Update
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Text Extraction Modal -->
+        <div id="textModal" class="modal">
+            <div class="modal-content modal-large">
+                <div class="modal-header">
+                    <h3><i class="fas fa-text-width"></i> Extracted Text</h3>
+                    <button class="close-btn" onclick="closeModal('textModal')">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div id="extractedText" class="extracted-text"></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="copyText()">
+                        <i class="fas fa-copy"></i> Copy All
+                    </button>
+                    <button class="btn btn-primary" onclick="closeModal('textModal')">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="loading-overlay">
+            <div class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Processing...</p>
+            </div>
+        </div>
+
+        <!-- Hidden File Input -->
+        <input type="file" id="fileInput" accept=".pdf" style="display: none;">
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

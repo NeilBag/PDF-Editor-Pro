@@ -1,0 +1,6 @@
+pdfeditor-pro/
+__pycache__/
+*.pyc
+*.log
+*.pdf
+.env
